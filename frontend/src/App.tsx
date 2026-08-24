@@ -97,10 +97,28 @@ function App() {
   const canSubmit =
     selectedMakeId !== '' && isYearValid && !!selectedVehicleType && !modelsLoading;
 
+  const selectedMakeName = makes.find((m) => m.id === selectedMakeId)?.name ?? '';
+
   return (
     <div className="page">
       <header className="page-header">
-        <h1>Vehicle Finder</h1>
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M8 27 L10.5 18.5 Q11.5 15 15.5 15 H32.5 Q36.5 15 37.5 18.5 L40 27"
+                stroke="currentColor"
+                strokeWidth="2.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <rect x="5" y="25" width="38" height="10" rx="5" fill="currentColor" />
+              <circle cx="15" cy="36" r="4.2" fill="var(--color-surface)" stroke="currentColor" strokeWidth="2.6" />
+              <circle cx="33" cy="36" r="4.2" fill="var(--color-surface)" stroke="currentColor" strokeWidth="2.6" />
+            </svg>
+          </span>
+          <h1>Vehicle Finder</h1>
+        </div>
         <p>Find vehicle models by manufacturer, year and vehicle type.</p>
       </header>
 
@@ -127,7 +145,15 @@ function App() {
           />
         </section>
 
-        <ModelResults models={models} loading={modelsLoading} error={modelsError} onRetry={runSearch} />
+        <ModelResults
+          models={models}
+          loading={modelsLoading}
+          error={modelsError}
+          onRetry={runSearch}
+          makeName={selectedMakeName}
+          year={year}
+          vehicleType={selectedVehicleType}
+        />
       </main>
     </div>
   );

@@ -50,6 +50,11 @@ export function SearchForm({
 }: SearchFormProps) {
   const makeOptions = useMemo(() => makes.map((m) => ({ id: m.id, label: m.name })), [makes]);
 
+  const yearError =
+    year !== '' && (year < MIN_MODEL_YEAR || year > MAX_MODEL_YEAR)
+      ? `Enter a year between ${MIN_MODEL_YEAR} and ${MAX_MODEL_YEAR}.`
+      : null;
+
   return (
     <form
       className="search-form"
@@ -58,60 +63,70 @@ export function SearchForm({
         if (canSubmit) onSubmit();
       }}
     >
-      <div className="field">
-        <label htmlFor="make-select">Make</label>
-        <SearchableSelect
-          id="make-select"
-          options={makeOptions}
-          value={selectedMakeId}
-          onChange={onMakeChange}
-          disabled={makesLoading || !!makesError}
-          placeholder={makesLoading ? 'Loading makes…' : 'Search for a make…'}
-        />
-        {makesError && <InlineError message={makesError} onRetry={onRetryMakes} />}
-      </div>
+      <div className="search-form-fields">
+        <div className="field">
+          <label htmlFor="make-select">Make</label>
+          <SearchableSelect
+            id="make-select"
+            options={makeOptions}
+            value={selectedMakeId}
+            onChange={onMakeChange}
+            disabled={makesLoading || !!makesError}
+            placeholder={makesLoading ? 'Loading makes…' : 'Search for a make…'}
+          />
+          {makesError && <InlineError message={makesError} onRetry={onRetryMakes} />}
+        </div>
 
-      <div className="field">
-        <label htmlFor="year-input">Year</label>
-        <input
-          id="year-input"
-          type="number"
-          inputMode="numeric"
-          min={MIN_MODEL_YEAR}
-          max={MAX_MODEL_YEAR}
-          value={year}
-          onChange={(e) => onYearChange(e.target.value === '' ? '' : Number(e.target.value))}
-        />
-        <p className="field-hint">{MIN_MODEL_YEAR}–{MAX_MODEL_YEAR}</p>
-      </div>
+        <div className="field">
+          <label htmlFor="year-input">Year</label>
+          <input
+            id="year-input"
+            type="number"
+            inputMode="numeric"
+            min={MIN_MODEL_YEAR}
+            max={MAX_MODEL_YEAR}
+            value={year}
+            aria-invalid={!!yearError}
+            aria-describedby={yearError ? 'year-error' : 'year-hint'}
+            onChange={(e) => onYearChange(e.target.value === '' ? '' : Number(e.target.value))}
+          />
+          {yearError ? (
+            <p id="year-error" className="field-error" role="alert">{yearError}</p>
+          ) : (
+            <p id="year-hint" className="field-hint">{MIN_MODEL_YEAR}–{MAX_MODEL_YEAR}</p>
+          )}
+        </div>
 
-      <div className="field">
-        <label htmlFor="vehicle-type-select">Vehicle Type</label>
-        <select
-          id="vehicle-type-select"
-          value={selectedVehicleType}
-          disabled={!selectedMakeId || vehicleTypesLoading || !!vehicleTypesError}
-          onChange={(e) => onVehicleTypeChange(e.target.value)}
-        >
-          <option value="">
-            {!selectedMakeId
-              ? 'Select a make first'
-              : vehicleTypesLoading
-                ? 'Loading vehicle types…'
-                : 'Select a vehicle type'}
-          </option>
-          {vehicleTypes.map((type) => (
-            <option key={type.id} value={type.name}>
-              {type.name}
+        <div className="field">
+          <label htmlFor="vehicle-type-select">Vehicle Type</label>
+          <select
+            id="vehicle-type-select"
+            value={selectedVehicleType}
+            disabled={!selectedMakeId || vehicleTypesLoading || !!vehicleTypesError}
+            onChange={(e) => onVehicleTypeChange(e.target.value)}
+          >
+            <option value="">
+              {!selectedMakeId
+                ? 'Select a make first'
+                : vehicleTypesLoading
+                  ? 'Loading vehicle types…'
+                  : 'Select a vehicle type'}
             </option>
-          ))}
-        </select>
-        {vehicleTypesError && <InlineError message={vehicleTypesError} onRetry={onRetryVehicleTypes} />}
+            {vehicleTypes.map((type) => (
+              <option key={type.id} value={type.name}>
+                {type.name}
+              </option>
+            ))}
+          </select>
+          {vehicleTypesError && <InlineError message={vehicleTypesError} onRetry={onRetryVehicleTypes} />}
+        </div>
       </div>
 
-      <button type="submit" className="search-button" disabled={!canSubmit || searching}>
-        {searching ? 'Searching…' : 'Search Vehicles'}
-      </button>
+      <div className="search-form-actions">
+        <button type="submit" className="search-button" disabled={!canSubmit || searching}>
+          {searching ? 'Searching…' : 'Search Vehicles'}
+        </button>
+      </div>
     </form>
   );
 }
