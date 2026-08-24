@@ -1,35 +1,136 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
+import './App.css';
+import { SearchForm } from './components/SearchForm';
+import { ModelResults } from './components/ModelResults';
+import { ApiError, getMakes, getVehicleTypes, searchModels } from './services/api';
+import { MAX_MODEL_YEAR, MIN_MODEL_YEAR } from './constants';
+import type { Make, VehicleModel, VehicleType } from './types/vehicle';
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+function errorMessage(err: unknown, fallback: string): string {
+  if (err instanceof ApiError) return err.message;
+  return fallback;
 }
 
-export default App
+function App() {
+  const [makes, setMakes] = useState<Make[]>([]);
+  const [makesLoading, setMakesLoading] = useState(true);
+  const [makesError, setMakesError] = useState<string | null>(null);
+  const [makesReloadKey, setMakesReloadKey] = useState(0);
+
+  const [selectedMakeId, setSelectedMakeId] = useState<number | ''>('');
+  const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
+  const [vehicleTypesLoading, setVehicleTypesLoading] = useState(false);
+  const [vehicleTypesError, setVehicleTypesError] = useState<string | null>(null);
+  const [vehicleTypesReloadKey, setVehicleTypesReloadKey] = useState(0);
+
+  const [selectedVehicleType, setSelectedVehicleType] = useState('');
+  const [year, setYear] = useState<number | ''>(new Date().getFullYear());
+
+  const [models, setModels] = useState<VehicleModel[] | null>(null);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsError, setModelsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setMakesLoading(true);
+    setMakesError(null);
+
+    getMakes(controller.signal)
+      .then(setMakes)
+      .catch((err) => {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        setMakesError(errorMessage(err, 'Unable to load vehicle makes. Please try again.'));
+      })
+      .finally(() => setMakesLoading(false));
+
+    return () => controller.abort();
+  }, [makesReloadKey]);
+
+  useEffect(() => {
+    if (selectedMakeId === '') {
+      setVehicleTypes([]);
+      setVehicleTypesError(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    setVehicleTypesLoading(true);
+    setVehicleTypesError(null);
+
+    getVehicleTypes(selectedMakeId, controller.signal)
+      .then(setVehicleTypes)
+      .catch((err) => {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        setVehicleTypesError(errorMessage(err, 'Unable to load vehicle types. Please try again.'));
+      })
+      .finally(() => setVehicleTypesLoading(false));
+
+    return () => controller.abort();
+  }, [selectedMakeId, vehicleTypesReloadKey]);
+
+  function handleMakeChange(makeId: number | '') {
+    setSelectedMakeId(makeId);
+    setSelectedVehicleType('');
+    setModels(null);
+    setModelsError(null);
+  }
+
+  function runSearch() {
+    if (selectedMakeId === '' || year === '' || !selectedVehicleType) return;
+
+    const controller = new AbortController();
+    setModelsLoading(true);
+    setModelsError(null);
+
+    searchModels(selectedMakeId, year, selectedVehicleType, controller.signal)
+      .then(setModels)
+      .catch((err) => {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        setModelsError(errorMessage(err, 'Vehicle data is temporarily unavailable.'));
+      })
+      .finally(() => setModelsLoading(false));
+
+    return () => controller.abort();
+  }
+
+  const isYearValid = year !== '' && year >= MIN_MODEL_YEAR && year <= MAX_MODEL_YEAR;
+  const canSubmit =
+    selectedMakeId !== '' && isYearValid && !!selectedVehicleType && !modelsLoading;
+
+  return (
+    <div className="page">
+      <header className="page-header">
+        <h1>Vehicle Finder</h1>
+        <p>Find vehicle models by manufacturer, year and vehicle type.</p>
+      </header>
+
+      <main className="content">
+        <section className="card">
+          <SearchForm
+            makes={makes}
+            makesLoading={makesLoading}
+            makesError={makesError}
+            onRetryMakes={() => setMakesReloadKey((key) => key + 1)}
+            selectedMakeId={selectedMakeId}
+            onMakeChange={handleMakeChange}
+            vehicleTypes={vehicleTypes}
+            vehicleTypesLoading={vehicleTypesLoading}
+            vehicleTypesError={vehicleTypesError}
+            onRetryVehicleTypes={() => setVehicleTypesReloadKey((key) => key + 1)}
+            selectedVehicleType={selectedVehicleType}
+            onVehicleTypeChange={setSelectedVehicleType}
+            year={year}
+            onYearChange={setYear}
+            onSubmit={runSearch}
+            canSubmit={canSubmit}
+            searching={modelsLoading}
+          />
+        </section>
+
+        <ModelResults models={models} loading={modelsLoading} error={modelsError} onRetry={runSearch} />
+      </main>
+    </div>
+  );
+}
+
+export default App;
