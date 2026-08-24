@@ -8,6 +8,8 @@ namespace VehicleFinder.Api.Controllers;
 [Route("api/vehicles")]
 public class VehiclesController : ControllerBase
 {
+    private const int MinModelYear = 1900;
+
     private readonly IVehicleService _vehicleService;
     private readonly ILogger<VehiclesController> _logger;
 
@@ -45,6 +47,38 @@ public class VehiclesController : ControllerBase
         {
             var vehicleTypes = await _vehicleService.GetVehicleTypesAsync(makeId, cancellationToken);
             return Ok(vehicleTypes);
+        }
+        catch (NhtsaApiException ex)
+        {
+            return ProblemFromNhtsaException(ex);
+        }
+    }
+
+    /// <summary>Returns vehicle models matching a make, model year and vehicle type, deduplicated and sorted alphabetically.</summary>
+    [HttpGet("models")]
+    public async Task<IActionResult> GetModels([FromQuery] int makeId, [FromQuery] int year, [FromQuery] string? vehicleType, CancellationToken cancellationToken)
+    {
+        var maxModelYear = DateTime.UtcNow.Year + 1;
+
+        if (makeId <= 0)
+        {
+            return ValidationProblem("Make ID must be a positive integer.");
+        }
+
+        if (year < MinModelYear || year > maxModelYear)
+        {
+            return ValidationProblem($"Year must be between {MinModelYear} and {maxModelYear}.");
+        }
+
+        if (string.IsNullOrWhiteSpace(vehicleType))
+        {
+            return ValidationProblem("Vehicle type must not be empty.");
+        }
+
+        try
+        {
+            var models = await _vehicleService.GetModelsAsync(makeId, year, vehicleType.Trim(), cancellationToken);
+            return Ok(models);
         }
         catch (NhtsaApiException ex)
         {
