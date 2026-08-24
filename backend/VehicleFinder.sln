@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VehicleFinder.Api", "VehicleFinder.Api\VehicleFinder.Api.csproj", "{94D98C2B-09F6-4B68-8CB7-569487BA1ECA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VehicleFinder.Tests", "VehicleFinder.Tests\VehicleFinder.Tests.csproj", "{5B8CEA24-0111-46F8-8BD3-579B02020694}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{94D98C2B-09F6-4B68-8CB7-569487BA1ECA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94D98C2B-09F6-4B68-8CB7-569487BA1ECA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94D98C2B-09F6-4B68-8CB7-569487BA1ECA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94D98C2B-09F6-4B68-8CB7-569487BA1ECA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B8CEA24-0111-46F8-8BD3-579B02020694}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B8CEA24-0111-46F8-8BD3-579B02020694}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B8CEA24-0111-46F8-8BD3-579B02020694}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B8CEA24-0111-46F8-8BD3-579B02020694}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
