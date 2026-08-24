@@ -32,6 +32,26 @@ public class VehiclesController : ControllerBase
         }
     }
 
+    /// <summary>Returns the vehicle types available for a given make, deduplicated and sorted alphabetically.</summary>
+    [HttpGet("makes/{makeId}/types")]
+    public async Task<IActionResult> GetVehicleTypes(int makeId, CancellationToken cancellationToken)
+    {
+        if (makeId <= 0)
+        {
+            return ValidationProblem("Make ID must be a positive integer.");
+        }
+
+        try
+        {
+            var vehicleTypes = await _vehicleService.GetVehicleTypesAsync(makeId, cancellationToken);
+            return Ok(vehicleTypes);
+        }
+        catch (NhtsaApiException ex)
+        {
+            return ProblemFromNhtsaException(ex);
+        }
+    }
+
     private ObjectResult ProblemFromNhtsaException(NhtsaApiException ex)
     {
         var (statusCode, title) = ex.Reason switch

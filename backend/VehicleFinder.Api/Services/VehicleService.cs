@@ -24,4 +24,17 @@ public class VehicleService : IVehicleService
             .OrderBy(m => m.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
+
+    public async Task<IReadOnlyList<VehicleTypeDto>> GetVehicleTypesAsync(int makeId, CancellationToken cancellationToken)
+    {
+        var vehicleTypes = await _nhtsaClient.GetVehicleTypesForMakeIdAsync(makeId, cancellationToken);
+
+        return vehicleTypes
+            .Where(t => t.VehicleTypeId > 0 && !string.IsNullOrWhiteSpace(t.VehicleTypeName))
+            .Select(t => new VehicleTypeDto(t.VehicleTypeId, t.VehicleTypeName!.Trim()))
+            .GroupBy(t => t.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.First())
+            .OrderBy(t => t.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
 }

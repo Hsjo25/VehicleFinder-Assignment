@@ -27,6 +27,12 @@ public class NhtsaClient : INhtsaClient
         return response.Results;
     }
 
+    public async Task<IReadOnlyList<NhtsaVehicleType>> GetVehicleTypesForMakeIdAsync(int makeId, CancellationToken cancellationToken)
+    {
+        var response = await GetAsync<NhtsaVehicleType>($"vehicles/GetVehicleTypesForMakeId/{makeId}?format=json", cancellationToken);
+        return response.Results;
+    }
+
     private async Task<NhtsaApiResponse<T>> GetAsync<T>(string relativeUrl, CancellationToken cancellationToken)
     {
         HttpResponseMessage response;
