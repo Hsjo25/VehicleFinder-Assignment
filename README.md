@@ -160,8 +160,10 @@ Given the assignment's priority on minimal/free cost first and Docker compatibil
 7. **(Optional) Elastic IP**: attach one so the public address doesn't change on instance restart.
 8. **(Optional) HTTPS/custom domain**: not set up by default — for a production deployment, put the instance behind a reverse proxy with a Let's Encrypt certificate, or in front of CloudFront/an Application Load Balancer with an ACM certificate.
 
-No AWS resources have been provisioned as part of this work — the steps above are ready to run when you choose to deploy.
+This has been deployed following the steps above — a `t3.micro` EC2 instance running the app via `docker compose up -d --build`.
 
 ## Live Application
 
-Live Application: TBD
+Live Application: http://16.171.10.19:3000
+
+Note: no Elastic IP is attached, so this address will change if the instance is stopped/restarted.
