@@ -63,9 +63,9 @@ public class VehiclesController : ControllerBase
             return ValidationProblem("Make ID must be a positive integer.");
         }
 
-        if (year > maxModelYear)
+        if (year <= 0 || year > maxModelYear)
         {
-            return ValidationProblem($"Year must be at most {maxModelYear}.");
+            return ValidationProblem($"Year must be a positive number no later than {maxModelYear}.");
         }
 
         if (string.IsNullOrWhiteSpace(vehicleType))

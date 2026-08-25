@@ -93,7 +93,7 @@ function App() {
     return () => controller.abort();
   }
 
-  const isYearValid = year !== '' && year <= MAX_MODEL_YEAR;
+  const isYearValid = year !== '' && year > 0 && year <= MAX_MODEL_YEAR;
   const canSubmit =
     selectedMakeId !== '' && isYearValid && !!selectedVehicleType && !modelsLoading;
 

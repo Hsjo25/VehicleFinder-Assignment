@@ -51,7 +51,9 @@ export function SearchForm({
   const makeOptions = useMemo(() => makes.map((m) => ({ id: m.id, label: m.name })), [makes]);
 
   const yearError =
-    year !== '' && year > MAX_MODEL_YEAR ? `Enter a year no later than ${MAX_MODEL_YEAR}.` : null;
+    year !== '' && (year <= 0 || year > MAX_MODEL_YEAR)
+      ? `Enter a positive year no later than ${MAX_MODEL_YEAR}.`
+      : null;
 
   return (
     <form
@@ -81,6 +83,7 @@ export function SearchForm({
             id="year-input"
             type="number"
             inputMode="numeric"
+            min={1}
             max={MAX_MODEL_YEAR}
             value={year}
             aria-invalid={!!yearError}

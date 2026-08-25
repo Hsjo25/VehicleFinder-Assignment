@@ -52,6 +52,19 @@ public class VehiclesControllerTests
         Assert.Equal(StatusCodes.Status400BadRequest, objectResult.StatusCode);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-11111)]
+    public async Task GetModels_NonPositiveYear_ReturnsBadRequest(int year)
+    {
+        var controller = CreateController(new FakeVehicleService());
+
+        var result = await controller.GetModels(448, year, "Truck", CancellationToken.None);
+
+        var objectResult = Assert.IsAssignableFrom<ObjectResult>(result);
+        Assert.Equal(StatusCodes.Status400BadRequest, objectResult.StatusCode);
+    }
+
     [Fact]
     public async Task GetModels_EmptyVehicleType_ReturnsBadRequest()
     {
