@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using VehicleFinder.Api.Exceptions;
 using VehicleFinder.Api.Models.Nhtsa;
 using VehicleFinder.Api.Services;
@@ -7,6 +8,9 @@ namespace VehicleFinder.Tests.Services;
 
 public class VehicleServiceTests
 {
+    private static VehicleService CreateService(FakeNhtsaClient client) =>
+        new(client, new MemoryCache(new MemoryCacheOptions()));
+
     [Fact]
     public async Task GetMakesAsync_MapsAndSortsAlphabetically()
     {
@@ -18,7 +22,7 @@ public class VehicleServiceTests
                 new NhtsaMake { MakeId = 1, MakeName = "Honda" },
             },
         };
-        var service = new VehicleService(client);
+        var service = CreateService(client);
 
         var result = await service.GetMakesAsync(CancellationToken.None);
 
@@ -37,7 +41,7 @@ public class VehicleServiceTests
                 new NhtsaMake { MakeId = 2, MakeName = "TOYOTA" },
             },
         };
-        var service = new VehicleService(client);
+        var service = CreateService(client);
 
         var result = await service.GetMakesAsync(CancellationToken.None);
 
@@ -57,7 +61,7 @@ public class VehicleServiceTests
                 new NhtsaMake { MakeId = 7, MakeName = "Valid" },
             },
         };
-        var service = new VehicleService(client);
+        var service = CreateService(client);
 
         var result = await service.GetMakesAsync(CancellationToken.None);
 
@@ -77,7 +81,7 @@ public class VehicleServiceTests
                 new NhtsaVehicleType { VehicleTypeId = 4, VehicleTypeName = "Truck" },
             },
         };
-        var service = new VehicleService(client);
+        var service = CreateService(client);
 
         var result = await service.GetVehicleTypesAsync(448, CancellationToken.None);
 
@@ -94,7 +98,7 @@ public class VehicleServiceTests
                 new NhtsaVehicleModel { ModelId = 1, ModelName = "Tacoma", MakeName = "TOYOTA" },
             },
         };
-        var service = new VehicleService(client);
+        var service = CreateService(client);
 
         var result = await service.GetModelsAsync(448, 2015, "Truck", CancellationToken.None);
 
@@ -115,7 +119,7 @@ public class VehicleServiceTests
                 new NhtsaVehicleModel { ModelId = 3, ModelName = "Tundra", MakeName = "TOYOTA" },
             },
         };
-        var service = new VehicleService(client);
+        var service = CreateService(client);
 
         var result = await service.GetModelsAsync(448, 2015, "Truck", CancellationToken.None);
 
@@ -129,9 +133,40 @@ public class VehicleServiceTests
         {
             ExceptionToThrow = new NhtsaApiException("The vehicle data provider timed out.", NhtsaFailureReason.Timeout),
         };
-        var service = new VehicleService(client);
+        var service = CreateService(client);
 
         var ex = await Assert.ThrowsAsync<NhtsaApiException>(() => service.GetMakesAsync(CancellationToken.None));
         Assert.Equal(NhtsaFailureReason.Timeout, ex.Reason);
+    }
+
+    [Fact]
+    public async Task GetMakesAsync_CachesResultAcrossCalls()
+    {
+        var client = new FakeNhtsaClient
+        {
+            Makes = new[] { new NhtsaMake { MakeId = 1, MakeName = "Honda" } },
+        };
+        var service = CreateService(client);
+
+        await service.GetMakesAsync(CancellationToken.None);
+        await service.GetMakesAsync(CancellationToken.None);
+
+        Assert.Equal(1, client.GetAllMakesCallCount);
+    }
+
+    [Fact]
+    public async Task GetVehicleTypesAsync_CachesPerMakeId()
+    {
+        var client = new FakeNhtsaClient
+        {
+            VehicleTypes = new[] { new NhtsaVehicleType { VehicleTypeId = 2, VehicleTypeName = "Truck" } },
+        };
+        var service = CreateService(client);
+
+        await service.GetVehicleTypesAsync(448, CancellationToken.None);
+        await service.GetVehicleTypesAsync(448, CancellationToken.None);
+        await service.GetVehicleTypesAsync(474, CancellationToken.None);
+
+        Assert.Equal(2, client.GetVehicleTypesCallCount);
     }
 }

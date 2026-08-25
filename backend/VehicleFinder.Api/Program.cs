@@ -21,6 +21,7 @@ builder.Services.AddHttpClient<INhtsaClient, NhtsaClient>((serviceProvider, clie
     client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
 });
 
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 
 const string FrontendCorsPolicy = "Frontend";

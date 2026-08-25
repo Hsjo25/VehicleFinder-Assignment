@@ -12,14 +12,19 @@ public class FakeNhtsaClient : INhtsaClient
     public IReadOnlyList<NhtsaVehicleModel> Models { get; set; } = Array.Empty<NhtsaVehicleModel>();
     public NhtsaApiException? ExceptionToThrow { get; set; }
 
+    public int GetAllMakesCallCount { get; private set; }
+    public int GetVehicleTypesCallCount { get; private set; }
+
     public Task<IReadOnlyList<NhtsaMake>> GetAllMakesAsync(CancellationToken cancellationToken)
     {
+        GetAllMakesCallCount++;
         if (ExceptionToThrow is not null) throw ExceptionToThrow;
         return Task.FromResult(Makes);
     }
 
     public Task<IReadOnlyList<NhtsaVehicleType>> GetVehicleTypesForMakeIdAsync(int makeId, CancellationToken cancellationToken)
     {
+        GetVehicleTypesCallCount++;
         if (ExceptionToThrow is not null) throw ExceptionToThrow;
         return Task.FromResult(VehicleTypes);
     }
