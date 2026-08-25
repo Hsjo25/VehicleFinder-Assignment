@@ -8,8 +8,6 @@ namespace VehicleFinder.Api.Controllers;
 [Route("api/vehicles")]
 public class VehiclesController : ControllerBase
 {
-    private const int MinModelYear = 1900;
-
     private readonly IVehicleService _vehicleService;
     private readonly ILogger<VehiclesController> _logger;
 
@@ -65,9 +63,9 @@ public class VehiclesController : ControllerBase
             return ValidationProblem("Make ID must be a positive integer.");
         }
 
-        if (year < MinModelYear || year > maxModelYear)
+        if (year > maxModelYear)
         {
-            return ValidationProblem($"Year must be between {MinModelYear} and {maxModelYear}.");
+            return ValidationProblem($"Year must be at most {maxModelYear}.");
         }
 
         if (string.IsNullOrWhiteSpace(vehicleType))

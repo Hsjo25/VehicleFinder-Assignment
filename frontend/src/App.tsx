@@ -3,7 +3,7 @@ import './App.css';
 import { SearchForm } from './components/SearchForm';
 import { ModelResults } from './components/ModelResults';
 import { ApiError, getMakes, getVehicleTypes, searchModels } from './services/api';
-import { MAX_MODEL_YEAR, MIN_MODEL_YEAR } from './constants';
+import { MAX_MODEL_YEAR } from './constants';
 import type { Make, VehicleModel, VehicleType } from './types/vehicle';
 
 function errorMessage(err: unknown, fallback: string): string {
@@ -93,7 +93,7 @@ function App() {
     return () => controller.abort();
   }
 
-  const isYearValid = year !== '' && year >= MIN_MODEL_YEAR && year <= MAX_MODEL_YEAR;
+  const isYearValid = year !== '' && year <= MAX_MODEL_YEAR;
   const canSubmit =
     selectedMakeId !== '' && isYearValid && !!selectedVehicleType && !modelsLoading;
 

@@ -44,8 +44,9 @@ public class VehiclesControllerTests
     public async Task GetModels_YearOutOfRange_ReturnsBadRequest()
     {
         var controller = CreateController(new FakeVehicleService());
+        var farFutureYear = DateTime.UtcNow.Year + 100;
 
-        var result = await controller.GetModels(448, 1899, "Truck", CancellationToken.None);
+        var result = await controller.GetModels(448, farFutureYear, "Truck", CancellationToken.None);
 
         var objectResult = Assert.IsAssignableFrom<ObjectResult>(result);
         Assert.Equal(StatusCodes.Status400BadRequest, objectResult.StatusCode);

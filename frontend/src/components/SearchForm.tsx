@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { Make, VehicleType } from '../types/vehicle';
-import { MAX_MODEL_YEAR, MIN_MODEL_YEAR } from '../constants';
+import { MAX_MODEL_YEAR } from '../constants';
 import { InlineError } from './InlineError';
 import { SearchableSelect } from './SearchableSelect';
 
@@ -51,9 +51,7 @@ export function SearchForm({
   const makeOptions = useMemo(() => makes.map((m) => ({ id: m.id, label: m.name })), [makes]);
 
   const yearError =
-    year !== '' && (year < MIN_MODEL_YEAR || year > MAX_MODEL_YEAR)
-      ? `Enter a year between ${MIN_MODEL_YEAR} and ${MAX_MODEL_YEAR}.`
-      : null;
+    year !== '' && year > MAX_MODEL_YEAR ? `Enter a year no later than ${MAX_MODEL_YEAR}.` : null;
 
   return (
     <form
@@ -83,7 +81,6 @@ export function SearchForm({
             id="year-input"
             type="number"
             inputMode="numeric"
-            min={MIN_MODEL_YEAR}
             max={MAX_MODEL_YEAR}
             value={year}
             aria-invalid={!!yearError}
@@ -93,7 +90,7 @@ export function SearchForm({
           {yearError ? (
             <p id="year-error" className="field-error" role="alert">{yearError}</p>
           ) : (
-            <p id="year-hint" className="field-hint">{MIN_MODEL_YEAR}–{MAX_MODEL_YEAR}</p>
+            <p id="year-hint" className="field-hint">Up to {MAX_MODEL_YEAR}</p>
           )}
         </div>
 
